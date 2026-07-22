@@ -1,0 +1,27 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "HomeRegistrationEvent",
+  "type": "object",
+  "required": ["homeId", "name", "contactEmail", "budgetQuota", "currentRate", "penaltyRate", "appliances"],
+  "properties": {
+    "homeId": { "type": "integer" },
+    "name": { "type": "string" },
+    "contactEmail": { "type": "string", "format": "email" },
+    "budgetQuota": { "type": "number" },
+    "currentRate": { "type": "number" },
+    "penaltyRate": { "type": "number" },
+    "appliances": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["applianceId", "name", "type", "safeLimitWatts"],
+        "properties": {
+          "applianceId": { "type": "integer" },
+          "name": { "type": "string" },
+          "type": { "type": "string" },
+          "safeLimitWatts": { "type": "number" }
+        }
+      }
+    }
+  }
+}

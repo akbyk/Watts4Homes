@@ -1,10 +1,9 @@
-package com.akbyk.watts4homes;
+package com.akbyk.watts4homes.core;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.boot.jdbc.autoconfigure.DataSourceAutoConfiguration;
 
-@SpringBootApplication(exclude = { DataSourceAutoConfiguration.class })
+@SpringBootApplication()
 public class Watts4HomesApplication {
 
     public static void main(String[] args) {

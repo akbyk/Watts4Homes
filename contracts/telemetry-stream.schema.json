@@ -1,0 +1,12 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "TelemetryReading",
+  "type": "object",
+  "required": ["homeId", "applianceId", "watts", "timestamp"],
+  "properties": {
+    "homeId": { "type": "integer" },
+    "applianceId": { "type": "integer" },
+    "watts": { "type": "number" },
+    "timestamp": { "type": "string", "format": "date-time" }
+  }
+}
