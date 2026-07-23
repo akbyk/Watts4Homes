@@ -34,7 +34,12 @@ public class HomeService {
             Appliance appliance = new Appliance();
             appliance.setName(applianceRequest.name());
             appliance.setType(applianceRequest.type());
-            appliance.setSafeLimitWatts(applianceRequest.safeLimitWatts());
+
+            // Convert Double from ApplianceRequest to BigDecimal for Appliance
+            if (applianceRequest.safeLimitWatts() != null) {
+                appliance.setSafeLimitWatts(BigDecimal.valueOf(applianceRequest.safeLimitWatts()));
+            }
+
             home.addAppliance(appliance);
         }
 
@@ -48,8 +53,15 @@ public class HomeService {
 
     private HomeRegisteredEvent toKafkaEvent(Home home) {
         List<HomeRegisteredEvent.ApplianceEvent> appliances = home.getAppliances().stream()
-                .map(a -> new HomeRegisteredEvent.ApplianceEvent(a.getId(), a.getName(), a.getType(), a.getSafeLimitWatts()))
+                .map(a -> new HomeRegisteredEvent.ApplianceEvent(
+                        a.getId(),
+                        a.getName(),
+                        a.getType(),
+                        // Convert BigDecimal back to Double for ApplianceEvent constructor
+                        a.getSafeLimitWatts() != null ? a.getSafeLimitWatts().doubleValue() : null
+                ))
                 .toList();
+
         return new HomeRegisteredEvent(
                 home.getId(), home.getName(), home.getContactEmail(),
                 home.getBudgetQuota().doubleValue(), home.getCurrentRate().doubleValue(), home.getPenaltyRate().doubleValue(),
@@ -59,8 +71,15 @@ public class HomeService {
 
     private HomeRegistrationResponse toResponse(Home home) {
         List<HomeRegistrationResponse.ApplianceResponse> appliances = home.getAppliances().stream()
-                .map(a -> new HomeRegistrationResponse.ApplianceResponse(a.getId(), a.getName(), a.getType(), a.getSafeLimitWatts()))
+                .map(a -> new HomeRegistrationResponse.ApplianceResponse(
+                        a.getId(),
+                        a.getName(),
+                        a.getType(),
+                        // Convert BigDecimal back to Double for ApplianceResponse constructor
+                        a.getSafeLimitWatts() != null ? a.getSafeLimitWatts().doubleValue() : null
+                ))
                 .toList();
+
         return new HomeRegistrationResponse(home.getId(), home.getName(), home.getContactEmail(), appliances);
     }
 }
