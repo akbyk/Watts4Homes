@@ -1,6 +1,6 @@
 package com.akbyk.watts4homes.sensors.listener;
 
-import com.akbyk.watts4homes.core.event.HomeRegisteredEvent;
+import com.akbyk.watts4homes.sensors.event.HomeRegisteredEvent;
 import com.akbyk.watts4homes.sensors.registry.SimulatedAppliance;
 import com.akbyk.watts4homes.sensors.registry.SimulatedHome;
 import com.akbyk.watts4homes.sensors.registry.SimulationRegistry;
