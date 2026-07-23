@@ -25,13 +25,11 @@ services:
       retries: 10
 
   ignite:
-    image: apacheignite/ignite:2.16.0
+    image: apacheignite/ignite:3.1.0 
     container_name: watts4homes-ignite
     ports:
-      - "10800:10800"   # thin client port
-      - "${IGNITE_HTTP_PORT:-8080}:8080"     # REST/HTTP port (with 8080 fallback)
-      - "47500-47509:47500-47509"  # discovery
-      - "47100-47109:47100-47109"  # communication
+      - "10800:10800"   # client port
+      - "10300:10300"   # REST API port
     environment:
       JVM_OPTS: "-Xms512m -Xmx512m"
       IGNITE_QUIET: "false"
