@@ -5,6 +5,8 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.math.BigDecimal;
+
 @Entity
 @Table(name = "appliances")
 @Getter
@@ -27,5 +29,5 @@ public class Appliance {
     private String type;
 
     @Column(name = "safe_limit_watts", nullable = false)
-    private Double safeLimitWatts;
+    private BigDecimal safeLimitWatts;
 }
