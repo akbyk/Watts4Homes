@@ -31,6 +31,8 @@ spring:
       value-deserializer: org.springframework.kafka.support.serializer.JsonDeserializer
       properties:
         spring.json.trusted.packages: "com.akbyk.watts4homes.core.*"
+        spring.json.use.type.headers: false
+        spring.json.value.default.type: com.akbyk.watts4homes.core.telemetry.event.TelemetryReading
     producer:
       key-serializer: org.apache.kafka.common.serialization.StringSerializer
       value-serializer: org.springframework.kafka.support.serializer.JsonSerializer

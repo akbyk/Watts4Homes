@@ -18,7 +18,7 @@ public class HomeRegistrationListener {
 
     private final SimulationRegistry registry;
 
-    @KafkaListener(topics = "home-registration", groupId = "voltwise-sensors")
+    @KafkaListener(topics = "home-registration", groupId = "watts4homes-sensors")
     public void onHomeRegistered(HomeRegisteredEvent event) {
         List<SimulatedAppliance> appliances = event.appliances().stream()
                 .map(a -> new SimulatedAppliance(a.applianceId(), a.name(), a.type(), a.safeLimitWatts()))
