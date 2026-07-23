@@ -1,7 +1,9 @@
 package com.akbyk.watts4homes.core.rules;
 
+import com.akbyk.watts4homes.core.notifications.event.NotificationTrigger;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 
 import java.time.OffsetDateTime;
@@ -13,6 +15,7 @@ import java.util.Map;
 public class RulesService {
 
     private final EventLogRepository eventLogRepository;
+    private final ApplicationEventPublisher eventPublisher;
 
     public void evaluateQuota(Long homeId, HomeState state) {
         double eightyPercentThreshold = state.getBudgetQuota() * 0.8;
@@ -29,14 +32,14 @@ public class RulesService {
         if (!state.isBreachedHundredPercent() && state.getAccumulatedCost() >= state.getBudgetQuota()) {
             state.setBreachedHundredPercent(true);
             state.setTariffState("PENALTY");
-            logEventSafely(homeId, "100%_BREACH", Map.of(
+            Map<String, Object> context = Map.of(
                     "accumulatedCost", state.getAccumulatedCost(),
-                    "budgetQuota", state.getBudgetQuota()
-            ));
-            logEventSafely(homeId, "PENALTY_ACTIVATED", Map.of(
+                    "budgetQuota", state.getBudgetQuota(),
                     "penaltyRate", state.getPenaltyRate()
-            ));
-            log.info("[AI NOTIFICATION STUB] Would trigger 100% breach + penalty alert for homeId={}", homeId);
+            );
+            logEventSafely(homeId, "100%_BREACH", context);
+            logEventSafely(homeId, "PENALTY_ACTIVATED", Map.of("penaltyRate", state.getPenaltyRate()));
+            eventPublisher.publishEvent(new NotificationTrigger(homeId, NotificationTrigger.TriggerType.HUNDRED_PERCENT_BREACH, context));
         }
     }
 
@@ -46,15 +49,15 @@ public class RulesService {
 
             if (state.getConsecutiveBreachCount() >= 3 && !"ANOMALOUS".equals(state.getLastStatus())) {
                 state.setLastStatus("ANOMALOUS");
-                logEventSafely(homeId, "ANOMALY", Map.of(
+                Map<String, Object> context = Map.of(
                         "applianceId", applianceId,
                         "watts", watts,
                         "safeLimitWatts", state.getSafeLimitWatts()
-                ));
-                log.info("[AI NOTIFICATION STUB] Would trigger anomaly alert home={} appliance={}", homeId, applianceId);
+                );
+                logEventSafely(homeId, "ANOMALY", context);
+                eventPublisher.publishEvent(new NotificationTrigger(homeId, NotificationTrigger.TriggerType.ANOMALY, context));
             }
         } else {
-            // Reading is back under the limit: reset immediately, no partial credit.
             state.setConsecutiveBreachCount(0);
             state.setLastStatus("NORMAL");
         }

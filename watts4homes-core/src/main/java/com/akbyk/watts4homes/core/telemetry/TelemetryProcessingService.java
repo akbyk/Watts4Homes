@@ -13,6 +13,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.ignite.table.KeyValueView;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
+
 @Service
 @RequiredArgsConstructor
 @Slf4j
@@ -86,6 +88,15 @@ public class TelemetryProcessingService {
         Home home = homeRepository.findById(homeId)
                 .orElseThrow(() -> new IllegalStateException("Home not found for id=" + homeId));
 
+        List<Long> applianceIds = applianceRepository.findByHomeId(homeId).stream()
+                .map(Appliance::getId)
+                .toList();
+
+        // Convert List<Long> to a comma-separated String for Ignite 3 SQL compatibility
+        String applianceIdsCsv = applianceIds.stream()
+                .map(String::valueOf)
+                .collect(java.util.stream.Collectors.joining(","));
+
         HomeState state = new HomeState();
         state.setBudgetQuota(home.getBudgetQuota().doubleValue());
         state.setCurrentRate(home.getCurrentRate().doubleValue());
@@ -95,6 +106,8 @@ public class TelemetryProcessingService {
         state.setTariffState("NORMAL");
         state.setBreachedEightyPercent(false);
         state.setBreachedHundredPercent(false);
+        state.setApplianceIdsCsv(applianceIdsCsv);
+
         return state;
     }
 

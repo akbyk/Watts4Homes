@@ -2,5 +2,8 @@ package com.akbyk.watts4homes.core.homes;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 
+import java.util.List;
+
 public interface ApplianceRepository extends JpaRepository<Appliance, Long> {
+    List<Appliance> findByHomeId(Long homeId);
 }
