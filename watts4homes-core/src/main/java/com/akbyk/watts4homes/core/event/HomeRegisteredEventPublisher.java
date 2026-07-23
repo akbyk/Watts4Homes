@@ -1,4 +1,4 @@
-package com.akbyk.watts4homes.homes.event;
+package com.akbyk.watts4homes.core.event;
 
 import com.akbyk.watts4homes.core.config.KafkaTopicConfig;
 import lombok.RequiredArgsConstructor;
