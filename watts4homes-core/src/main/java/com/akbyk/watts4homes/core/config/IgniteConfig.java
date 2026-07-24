@@ -12,8 +12,9 @@ import org.springframework.context.annotation.Configuration;
 public class IgniteConfig {
 
     // In Ignite 3, standard Key-Value caches are replaced by Tables.
-    public static final String HOME_STATE_TABLE = "home-state";
-    public static final String APPLIANCE_BREACH_TABLE = "appliance-breach";
+    // Hyphens are not valid in unquoted SQL identifiers -> underscores instead
+    public static final String HOME_STATE_TABLE = "HOME_STATE";
+    public static final String APPLIANCE_BREACH_TABLE = "APPLIANCE_BREACH";
 
     @Value("${watts4homes.ignite.address}")
     private String igniteAddress;
