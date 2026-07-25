@@ -38,7 +38,7 @@ export function HomeDetailModal({
   }, [onClose]);
 
   const usedPercent = Math.round(
-    (home.accumulatedCost / (home.budgetQuota * 100)) * 100
+    (home.accumulatedCost / home.budgetQuota) * 100
   );
 
   return (
@@ -112,11 +112,6 @@ export function HomeDetailModal({
             </span>
           </div>
         </div>
-        {/* consumption trend */}
-        <h3 className="mb-3 mt-6 font-display text-lg font-500 text-ink">
-          7 günlük tüketim
-        </h3>
-        <TrendChart homeId={home.homeId} color={accent} />
         {/* appliance list */}
         <h3 className="mb-3 mt-6 font-display text-lg font-500 text-ink">
           Cihazlar
@@ -158,6 +153,12 @@ export function HomeDetailModal({
             );
           })}
         </div>
+
+        {/* consumption trend -> under the appliance list per spec */}
+        <h3 className="mb-3 mt-6 font-display text-lg font-500 text-ink">
+          Son 30 günlük tüketim
+        </h3>
+        <TrendChart homeId={home.homeId} color={accent} />
       </div>
     </div>
   );
