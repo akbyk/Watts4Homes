@@ -1,0 +1,51 @@
+@import "tailwindcss";
+
+/* VoltWise design tokens
+   colors are functional: each hue names a state, not a decoration
+   green = healthy, blue = data, amber = warning, coral = breach */
+@theme {
+  --color-paper: #fbfdfc;
+  --color-mist: #f1f6f4;
+  --color-ink: #1c2b33;
+  --color-slate: #5b6b73;
+
+  --color-energy: #0fa968;
+  --color-energy-soft: #e3f5ec;
+  --color-deep: #0e7c9b;
+  --color-deep-soft: #e2f0f5;
+  --color-amber: #f4b740;
+  --color-amber-soft: #fdf2da;
+  --color-coral: #e5484d;
+  --color-coral-soft: #fdebeb;
+
+  --color-line: #e4ece9;
+
+  --font-display: "Fraunces", Georgia, serif;
+  --font-body: "Inter", system-ui, sans-serif;
+  --font-mono: "JetBrains Mono", monospace;
+
+  --radius-card: 20px;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  margin: 0;
+  background-color: var(--color-paper);
+  color: var(--color-ink);
+  font-family: var(--font-body);
+  -webkit-font-smoothing: antialiased;
+}
+
+/* respect users who prefer less motion */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
