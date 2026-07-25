@@ -51,7 +51,8 @@ public class GeminiClient {
 
             return response.candidates().get(0).content().parts().get(0).text();
         } catch (Exception e) {
-            log.error("Gemini call failed (timeout, rate-limit, or unreachable) - using fallback advisory text", e);
+            log.error("Gemini call failed ({}: {}) - using fallback advisory text",
+                    e.getClass().getSimpleName(), e.getMessage());
             return FALLBACK_TEXT;
         }
     }

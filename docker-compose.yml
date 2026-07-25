@@ -9,8 +9,8 @@ services:
     environment:
       KAFKA_NODE_ID: 1
       KAFKA_PROCESS_ROLES: broker,controller
-      KAFKA_LISTENERS: PLAINTEXT://:9092,CONTROLLER://:9093,PLAINTEXT_HOST://:9094
-      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:9092,PLAINTEXT_HOST://localhost:9092
+      KAFKA_LISTENERS: PLAINTEXT://:29092,CONTROLLER://:9093,PLAINTEXT_HOST://:9092
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:29092,PLAINTEXT_HOST://localhost:9092
       KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: CONTROLLER:PLAINTEXT,PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT
       KAFKA_CONTROLLER_LISTENER_NAMES: CONTROLLER
       KAFKA_CONTROLLER_QUORUM_VOTERS: 1@kafka:9093
@@ -19,23 +19,23 @@ services:
       KAFKA_GROUP_INITIAL_REBALANCE_DELAY_MS: 0
       CLUSTER_ID: "MkU3OEVBNTcwNTJENDM2Qk"
     healthcheck:
-      test: ["CMD-SHELL", "/opt/kafka/bin/kafka-broker-api-versions.sh --bootstrap-server localhost:9092"]
+      test: [ "CMD-SHELL", "/opt/kafka/bin/kafka-broker-api-versions.sh --bootstrap-server localhost:9092" ]
       interval: 10s
       timeout: 10s
       retries: 10
 
   ignite:
-    image: apacheignite/ignite:3.1.0 
+    image: apacheignite/ignite:3.1.0
     container_name: watts4homes-ignite
     ports:
       - "127.0.0.1:10800:10800"   # client port
       - "10300:10300"   # REST API port
     environment:
-      JVM_OPTS: "-Xms512m -Xmx512m"
+      JVM_OPTS: "-Xms1g -Xmx1g -XX:+UseG1GC"
       IGNITE_QUIET: "false"
       OPTION_LIBS: "ignite-rest-http"
     healthcheck:
-      test: [ "CMD", "curl", "-f", "http://localhost:10300/api/v1/cluster/status" ]
+      test: [ "CMD-SHELL", "bash -c '(: < /dev/tcp/localhost/10300) >/dev/null 2>&1' || exit 1" ]
       interval: 10s
       timeout: 5s
       retries: 5
