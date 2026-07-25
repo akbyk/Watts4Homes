@@ -1,11 +1,47 @@
-import { mockHomes, mockApplianceMeta, mockHomeNames } from "./mockData";
-import type { HomeStatus, HomeRegistrationRequest } from "../types/api";
+import { mockHomes, mockApplianceMeta, mockHomeNames, mockTrends } from "./mockData";
+import type {
+  HomeStatus,
+  HomeRegistrationRequest,
+  HomeRegistrationResponse,
+  HistoricalTrend,
+} from "../types/api";
 
 // single switch: flip to false when the backend is ready
-const USE_MOCK = true;
+const USE_MOCK = false;
+
+// -------- name cache --------
+// the /status endpoints return ids only, never names -> we remember the
+// names from each registration response and reuse them across refreshes
+const CACHE_KEY = "w4h:meta";
+
+type MetaCache = {
+  homeNames: Record<number, string>;
+  applianceMeta: Record<number, { name: string; type: string }>;
+};
+
+// loading the cache from localStorage on startup -> empty if nothing saved
+function loadCache(): MetaCache {
+  try {
+    const raw = localStorage.getItem(CACHE_KEY);
+    if (raw) return JSON.parse(raw);
+  } catch {
+    // ignore a corrupt cache -> start fresh
+  }
+  return { homeNames: {}, applianceMeta: {} };
+}
+
+const cache = loadCache();
+
+// persisting the cache after every change
+function saveCache() {
+  try {
+    localStorage.setItem(CACHE_KEY, JSON.stringify(cache));
+  } catch {
+    // ignore write failures -> names just won't survive a refresh
+  }
+}
 
 // fetch all homes' live status
-// mock now, real /api/homes/status later - callers don't need to know which
 export async function fetchHomeStatus(): Promise<HomeStatus[]> {
   if (USE_MOCK) {
     // simulate a tiny network delay so loading states are visible
@@ -20,25 +56,26 @@ export async function fetchHomeStatus(): Promise<HomeStatus[]> {
   return res.json();
 }
 
-// the /status endpoint returns only IDs, so we resolve display names here.
-// with the real backend these come from the registration response we cache.
+// resolve a home's display name
+// real -> cached registration name, fall back to a generic label
 export function getHomeName(homeId: number): string {
   if (USE_MOCK) return mockHomeNames[homeId] ?? `Ev #${homeId}`;
-  return `Ev #${homeId}`;
+  return cache.homeNames[homeId] ?? `Ev #${homeId}`;
 }
 
+// resolve an appliance's name + type
 export function getApplianceMeta(applianceId: number): { name: string; type: string } {
   if (USE_MOCK) {
     return mockApplianceMeta[applianceId] ?? { name: "Cihaz", type: "DEFAULT" };
   }
-  return { name: "Cihaz", type: "DEFAULT" };
+  return cache.applianceMeta[applianceId] ?? { name: "Cihaz", type: "DEFAULT" };
 }
 
-// register a new home
-// mock now (adds to the in-memory list), POST /api/homes later
-let nextHomeId = 100; // mock ids start high to avoid clashing with seed data
+// mock-only id counters
+let nextHomeId = 100;
 let nextApplianceId = 100;
 
+// register a new home
 export async function registerHome(
   req: HomeRegistrationRequest
 ): Promise<void> {
@@ -75,13 +112,18 @@ export async function registerHome(
   if (!res.ok) {
     throw new Error(`Ev kaydedilemedi (${res.status})`);
   }
+
+  // the response carries the assigned ids plus the names we sent ->
+  // cache them so the dashboard and modal can show real labels
+  const created: HomeRegistrationResponse = await res.json();
+  cache.homeNames[created.homeId] = created.name;
+  for (const a of created.appliances) {
+    cache.applianceMeta[a.applianceId] = { name: a.name, type: a.type };
+  }
+  saveCache();
 }
 
-import type { HistoricalTrend } from "../types/api";
-import { mockTrends } from "./mockData";
-
 // fetch a home's historical trend
-// mock now, GET /api/homes/{id}/trend later
 export async function fetchTrend(homeId: number): Promise<HistoricalTrend> {
   if (USE_MOCK) {
     await new Promise((r) => setTimeout(r, 250));
