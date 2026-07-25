@@ -5,6 +5,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
 
 @Entity
@@ -25,8 +26,8 @@ public class ConsumptionSnapshot {
     private LocalDate date;
 
     @Column(name = "total_usage", nullable = false)
-    private double totalUsage;
+    private BigDecimal totalUsage;
 
     @Column(name = "total_cost", nullable = false)
-    private double totalCost;
+    private BigDecimal totalCost;
 }

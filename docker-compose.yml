@@ -28,12 +28,17 @@ services:
     image: apacheignite/ignite:3.1.0 
     container_name: watts4homes-ignite
     ports:
-      - "10800:10800"   # client port
+      - "127.0.0.1:10800:10800"   # client port
       - "10300:10300"   # REST API port
     environment:
       JVM_OPTS: "-Xms512m -Xmx512m"
       IGNITE_QUIET: "false"
       OPTION_LIBS: "ignite-rest-http"
+    healthcheck:
+      test: [ "CMD", "curl", "-f", "http://localhost:10300/api/v1/cluster/status" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
 
   postgres:
     image: postgres:16

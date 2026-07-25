@@ -7,5 +7,5 @@ public record HistoricalTrendResponse(
         Long homeId,
         List<DailyPoint> points
 ) {
-    public record DailyPoint(LocalDate date, double totalUsage, double totalCost) {}
+    public record DailyPoint(LocalDate date, java.math.BigDecimal totalUsage, java.math.BigDecimal totalCost) {}
 }

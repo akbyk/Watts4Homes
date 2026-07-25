@@ -5,9 +5,9 @@ import com.akbyk.watts4homes.core.homes.HomeRepository;
 import com.akbyk.watts4homes.core.notifications.event.NotificationTrigger;
 import com.akbyk.watts4homes.core.notifications.gemini.GeminiClient;
 import com.akbyk.watts4homes.core.rules.HomeState;
+import com.akbyk.watts4homes.core.rules.HomeStateStore;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.ignite.table.KeyValueView;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
@@ -18,7 +18,7 @@ import java.time.OffsetDateTime;
 @Slf4j
 public class NotificationService {
 
-    private final KeyValueView<Long, HomeState> homeStateView;
+    private final HomeStateStore homeStateStore;
     private final HomeRepository homeRepository;
     private final GeminiClient geminiClient;
     private final EmailService emailService;
@@ -29,9 +29,7 @@ public class NotificationService {
         try {
             Home home = homeRepository.findById(trigger.homeId())
                     .orElseThrow(() -> new IllegalStateException("Home not found for id=" + trigger.homeId()));
-
-            // Null as the first parameter signifies an implicit transaction in Ignite 3
-            HomeState state = homeStateView.get(null, trigger.homeId());
+            HomeState state = homeStateStore.get(trigger.homeId());
 
             String prompt = buildPrompt(home, state, trigger);
             String advisoryText = geminiClient.generateAdvisory(prompt);
@@ -43,7 +41,7 @@ public class NotificationService {
             recommendation = aiRecommendationRepository.save(recommendation);
 
             boolean sent = emailService.sendAdvisoryEmail(
-                    home.getContactEmail(), "VoltWise Enerji Uyarisi", advisoryText);
+                    home.getContactEmail(), "Watts4Homes Enerji Uyarisi", advisoryText);
 
             recommendation.setEmailStatus(sent ? "SENT" : "FAILED");
             recommendation.setSentAt(OffsetDateTime.now());

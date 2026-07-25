@@ -23,7 +23,7 @@ spring:
     baseline-on-migrate: true
 
   kafka:
-    bootstrap-servers: ${KAFKA_BOOTSTRAP_SERVERS:localhost:9092}
+    bootstrap-servers: localhost:9092
     consumer:
       group-id: watts4homes
       auto-offset-reset: earliest
@@ -51,10 +51,10 @@ spring:
 
 watts4homes:
   ignite:
-    address: ${IGNITE_ADDRESS:localhost:10800}
+    address: ${IGNITE_ADDRESS:127.0.0.1:10800}
   gemini:
     api-key: ${GEMINI_API_KEY}
-    api-url: ${GEMINI_API_URL:https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent}
+    api-url: ${GEMINI_API_URL:https://generativelanguage.googleapis.com/v1beta/models/gemini-flash-lite-latest:generateContent}
   mail:
     host: ${MAIL_HOST}
     port: ${MAIL_PORT:587}

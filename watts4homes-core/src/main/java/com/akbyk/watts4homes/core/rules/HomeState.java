@@ -11,14 +11,13 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 public class HomeState implements Serializable {
-    private double accumulatedUsage;
+    private double accumulatedUsage;   // kWh
     private double accumulatedCost;
-    private String tariffState;
+    private String tariffState;        // NORMAL | PENALTY
     private double budgetQuota;
     private double currentRate;
     private double penaltyRate;
     private boolean breachedEightyPercent;
     private boolean breachedHundredPercent;
-    private List<Long> applianceIds; // cached once at init, so status reads never hit Postgres
-    private String applianceIdsCsv;
+    private List<Long> applianceIds;   // cached once at init, so status reads never hit Postgres
 }
