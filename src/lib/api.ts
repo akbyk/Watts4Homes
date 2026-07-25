@@ -41,6 +41,44 @@ function saveCache() {
   }
 }
 
+// -------- hidden homes --------
+// no backend delete exists -> we just stop showing a home locally.
+// the home still lives in the backend, we simply filter it out here
+const HIDDEN_KEY = "w4h:hidden";
+
+// loading the set of hidden home ids from localStorage
+function loadHidden(): Set<number> {
+  try {
+    const raw = localStorage.getItem(HIDDEN_KEY);
+    if (raw) return new Set(JSON.parse(raw));
+  } catch {
+    // ignore a corrupt value -> nothing hidden
+  }
+  return new Set();
+}
+
+const hidden = loadHidden();
+
+// persisting the hidden set after every change
+function saveHidden() {
+  try {
+    localStorage.setItem(HIDDEN_KEY, JSON.stringify([...hidden]));
+  } catch {
+    // ignore write failures
+  }
+}
+
+// stop tracking a home -> hide it from the dashboard
+export function hideHome(homeId: number) {
+  hidden.add(homeId);
+  saveHidden();
+}
+
+// check whether a home is hidden
+export function isHidden(homeId: number): boolean {
+  return hidden.has(homeId);
+}
+
 // fetch all homes' live status
 export async function fetchHomeStatus(): Promise<HomeStatus[]> {
   if (USE_MOCK) {
