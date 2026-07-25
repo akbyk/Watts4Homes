@@ -8,19 +8,21 @@ interface AddHomeModalProps {
 }
 
 // appliance presets the user can pick, with sensible default watt limits
+// limits sit above the simulator's per-second output so appliances stay
+// normal -> the card color is then driven by budget, not constant anomalies
 const APPLIANCE_PRESETS = [
-  { type: "FRIDGE", name: "Buzdolabı", safeLimitWatts: 200 },
-  { type: "OVEN", name: "Fırın", safeLimitWatts: 2500 },
-  { type: "KETTLE", name: "Su Isıtıcısı", safeLimitWatts: 2000 },
-  { type: "WASHER", name: "Çamaşır Makinesi", safeLimitWatts: 2200 },
-  { type: "AC", name: "Klima", safeLimitWatts: 1500 },
+  { type: "FRIDGE", name: "Buzdolabı", safeLimitWatts: 10000 },
+  { type: "OVEN", name: "Fırın", safeLimitWatts: 15000 },
+  { type: "KETTLE", name: "Su Isıtıcısı", safeLimitWatts: 12000 },
+  { type: "WASHER", name: "Çamaşır Makinesi", safeLimitWatts: 12000 },
+  { type: "AC", name: "Klima", safeLimitWatts: 13000 },
 ];
 
 export function AddHomeModal({ onClose, onAdded }: AddHomeModalProps) {
   const [name, setName] = useState("");
   const [address, setAddress] = useState("");
   const [email, setEmail] = useState("");
-  const [budgetQuota, setBudgetQuota] = useState("0.5");
+  const [budgetQuota, setBudgetQuota] = useState("2000");
   const [appliances, setAppliances] = useState<ApplianceRequest[]>([]);
   const [submitting, setSubmitting] = useState(false);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
