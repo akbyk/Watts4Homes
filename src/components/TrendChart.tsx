@@ -15,6 +15,10 @@ interface TrendChartProps {
   color: string;
 }
 
+// cap the chart at the most recent points so a long history
+// never floods the DOM and freezes the modal
+const MAX_POINTS = 30;
+
 export function TrendChart({ homeId, color }: TrendChartProps) {
   // the trend data for this home
   const [trend, setTrend] = useState<HistoricalTrend | null>(null);
@@ -44,8 +48,11 @@ export function TrendChart({ homeId, color }: TrendChartProps) {
     );
   }
 
+  // keep only the last MAX_POINTS days -> slice from the tail (newest)
+  const recentPoints = trend.points.slice(-MAX_POINTS);
+
   // prepare the data for the chart
-  const chartData = trend.points.map((point) => ({
+  const chartData = recentPoints.map((point) => ({
     date: point.date.slice(5), // "07-24" instead of "2026-07-24"
     usage: point.totalUsage,
   }));
