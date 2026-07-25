@@ -5,7 +5,13 @@ import { EmptyState } from "../components/HouseDoodle";
 import { PulseLine } from "../components/PulseLine";
 import { HomeDetailModal } from "../components/HomeDetailModal";
 import { AddHomeModal } from "../components/AddHomeModal";
-import { fetchHomeStatus, getHomeName, getApplianceMeta } from "../lib/api";
+import {
+  fetchHomeStatus,
+  getHomeName,
+  getApplianceMeta,
+  hideHome,
+  isHidden,
+} from "../lib/api";
 import type { HomeStatus } from "../types/api";
 
 // derive a home's overall status from its numbers
@@ -25,11 +31,14 @@ function budgetPercent(home: HomeStatus): number {
 }
 
 export function Dashboard() {
+  // the list of homes we show on screen
   const [homes, setHomes] = useState<HomeStatus[]>([]);
   const [loading, setLoading] = useState(true);
   // holds a user-friendly message when polling fails -> null means all good
   const [error, setError] = useState<string | null>(null);
+  // which home's detail modal is open (null = none)
   const [selectedHomeId, setSelectedHomeId] = useState<number | null>(null);
+  // is the add-home form open?
   const [showAddModal, setShowAddModal] = useState(false);
 
   // load the homes from the api
@@ -37,7 +46,8 @@ export function Dashboard() {
   async function loadHomes() {
     try {
       const data = await fetchHomeStatus();
-      setHomes(data);
+      // drop any home the user chose to stop tracking
+      setHomes(data.filter((h) => !isHidden(h.homeId)));
       setError(null); // recovered -> clear any previous warning
     } catch {
       // suppress the raw error, show a human-readable message instead
@@ -51,10 +61,12 @@ export function Dashboard() {
   useEffect(() => {
     loadHomes();
     const timer = setInterval(loadHomes, 2000);
+    // stop the timer when leaving the page
     return () => clearInterval(timer);
   }, []);
 
   const hasHomes = homes.length > 0;
+  // find the selected home for the modal
   const selectedHome = homes.find((h) => h.homeId === selectedHomeId);
 
   return (
@@ -102,6 +114,7 @@ export function Dashboard() {
           )}
 
           {loading ? (
+            // still loading -> show grey placeholder cards
             <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3">
               <div className="h-[220px] rounded-[var(--radius-card)] border border-line bg-mist/50" />
               <div className="h-[220px] rounded-[var(--radius-card)] border border-line bg-mist/50" />
@@ -120,6 +133,11 @@ export function Dashboard() {
                     anomalous: a.status === "ANOMALOUS",
                   }))}
                   onClick={() => setSelectedHomeId(home.homeId)}
+                  onHide={() => {
+                    // stop tracking -> hide locally, then refetch to drop it
+                    hideHome(home.homeId);
+                    loadHomes();
+                  }}
                 />
               ))}
 
@@ -141,6 +159,7 @@ export function Dashboard() {
         </section>
       </main>
 
+      {/* detail modal */}
       {selectedHome && (
         <HomeDetailModal
           home={selectedHome}
@@ -150,8 +169,12 @@ export function Dashboard() {
         />
       )}
 
+      {/* add-home modal */}
       {showAddModal && (
-        <AddHomeModal onClose={() => setShowAddModal(false)} onAdded={loadHomes} />
+        <AddHomeModal
+          onClose={() => setShowAddModal(false)}
+          onAdded={loadHomes}
+        />
       )}
     </div>
   );
