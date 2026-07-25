@@ -8,9 +8,9 @@ import { AddHomeModal } from "../components/AddHomeModal";
 import { fetchHomeStatus, getHomeName, getApplianceMeta } from "../lib/api";
 import type { HomeStatus } from "../types/api";
 
-// figure out a home's overall status from its numbers
+// derive a home's overall status from its numbers
 function deriveStatus(home: HomeStatus): "NORMAL" | "WARNING" | "BREACH" | "ANOMALY" {
-  const usedRatio = home.accumulatedCost / (home.budgetQuota * 100);
+  const usedRatio = home.accumulatedCost / home.budgetQuota;
   const hasAnomaly = home.appliances.some((a) => a.status === "ANOMALOUS");
 
   if (home.tariffState === "PENALTY" || usedRatio >= 1) return "BREACH";
@@ -21,35 +21,40 @@ function deriveStatus(home: HomeStatus): "NORMAL" | "WARNING" | "BREACH" | "ANOM
 
 // budget usage as a percentage
 function budgetPercent(home: HomeStatus): number {
-  return (home.accumulatedCost / (home.budgetQuota * 100)) * 100;
+  return (home.accumulatedCost / home.budgetQuota) * 100;
 }
 
 export function Dashboard() {
-  // the list of homes we show on screen
   const [homes, setHomes] = useState<HomeStatus[]>([]);
   const [loading, setLoading] = useState(true);
-  // which home's detail modal is open (null = none)
+  // holds a user-friendly message when polling fails -> null means all good
+  const [error, setError] = useState<string | null>(null);
   const [selectedHomeId, setSelectedHomeId] = useState<number | null>(null);
-  // is the add-home form open?
   const [showAddModal, setShowAddModal] = useState(false);
 
   // load the homes from the api
+  // on failure -> keep the last good data on screen, surface a soft warning
   async function loadHomes() {
-    const data = await fetchHomeStatus();
-    setHomes(data);
-    setLoading(false);
+    try {
+      const data = await fetchHomeStatus();
+      setHomes(data);
+      setError(null); // recovered -> clear any previous warning
+    } catch {
+      // suppress the raw error, show a human-readable message instead
+      setError("Canlı veriye ulaşılamıyor. Bağlantı yeniden deneniyor...");
+    } finally {
+      setLoading(false);
+    }
   }
 
   // load once when the page opens, then every 2 seconds
   useEffect(() => {
     loadHomes();
     const timer = setInterval(loadHomes, 2000);
-    // stop the timer when leaving the page
     return () => clearInterval(timer);
   }, []);
 
   const hasHomes = homes.length > 0;
-  // find the selected home for the modal
   const selectedHome = homes.find((h) => h.homeId === selectedHomeId);
 
   return (
@@ -83,8 +88,20 @@ export function Dashboard() {
             {hasHomes && <span className="text-sm text-slate">{homes.length} ev</span>}
           </div>
 
+          {/* soft warning banner -> shows only when polling is failing */}
+          {error && (
+            <div
+              role="alert"
+              className="mb-4 flex items-center gap-2 rounded-2xl border border-coral/30 bg-coral-soft/50 px-4 py-3 text-sm text-coral"
+            >
+              <span className="grid h-5 w-5 place-items-center rounded-full bg-coral text-xs text-white">
+                !
+              </span>
+              {error}
+            </div>
+          )}
+
           {loading ? (
-            // still loading -> show grey placeholder cards
             <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3">
               <div className="h-[220px] rounded-[var(--radius-card)] border border-line bg-mist/50" />
               <div className="h-[220px] rounded-[var(--radius-card)] border border-line bg-mist/50" />
@@ -124,7 +141,6 @@ export function Dashboard() {
         </section>
       </main>
 
-      {/* detail modal */}
       {selectedHome && (
         <HomeDetailModal
           home={selectedHome}
@@ -134,12 +150,8 @@ export function Dashboard() {
         />
       )}
 
-      {/* add-home modal */}
       {showAddModal && (
-        <AddHomeModal
-          onClose={() => setShowAddModal(false)}
-          onAdded={loadHomes}
-        />
+        <AddHomeModal onClose={() => setShowAddModal(false)} onAdded={loadHomes} />
       )}
     </div>
   );
