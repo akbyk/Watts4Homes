@@ -11,11 +11,11 @@ interface AddHomeModalProps {
 // limits sit above the simulator's per-second output so appliances stay
 // normal -> the card color is then driven by budget, not constant anomalies
 const APPLIANCE_PRESETS = [
-  { type: "FRIDGE", name: "Buzdolabı", safeLimitWatts: 10000 },
-  { type: "OVEN", name: "Fırın", safeLimitWatts: 15000 },
-  { type: "KETTLE", name: "Su Isıtıcısı", safeLimitWatts: 12000 },
-  { type: "WASHER", name: "Çamaşır Makinesi", safeLimitWatts: 12000 },
-  { type: "AC", name: "Klima", safeLimitWatts: 13000 },
+  { type: "FRIDGE", name: "Buzdolabı", safeLimitWatts: 50000 },
+  { type: "OVEN", name: "Fırın", safeLimitWatts: 50000 },
+  { type: "KETTLE", name: "Su Isıtıcısı", safeLimitWatts: 50000 },
+  { type: "WASHER", name: "Çamaşır Makinesi", safeLimitWatts: 50000 },
+  { type: "AC", name: "Klima", safeLimitWatts: 50000 },
 ];
 
 export function AddHomeModal({ onClose, onAdded }: AddHomeModalProps) {

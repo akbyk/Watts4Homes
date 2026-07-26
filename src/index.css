@@ -27,6 +27,38 @@
   --radius-card: 20px;
 }
 
+/* dark theme -> override the same tokens so every bg-*/text-* utility flips */
+.dark {
+  --color-paper: #10161a;
+  --color-mist: #1a2329;
+  --color-ink: #e9efec;
+  --color-slate: #93a2a8;
+
+  --color-energy: #16b378;
+  --color-energy-soft: #123328;
+  --color-deep: #29a8ca;
+  --color-deep-soft: #10303a;
+  --color-amber: #f4b740;
+  --color-amber-soft: #372c12;
+  --color-coral: #f0595e;
+  --color-coral-soft: #371a1c;
+
+  --color-line: #26323a;
+
+  color-scheme: dark;
+}
+
+/* surfaces that use literal colors instead of tokens ->
+   :where() keeps specificity low so hover states still win */
+:where(.dark) .bg-white {
+  background-color: var(--color-mist);
+}
+
+/* modal backdrop uses bg-ink/40; in dark that would turn light -> force dark */
+:where(.dark) .bg-ink\/40 {
+  background-color: rgba(0, 0, 0, 0.6);
+}
+
 html {
   scroll-behavior: smooth;
 }

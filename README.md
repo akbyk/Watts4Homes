@@ -57,25 +57,6 @@ Consumed endpoints:
 | `GET`  | `/api/homes/{id}/trend` | Historical consumption trend |
 | `POST` | `/api/homes` | Register a new home |
 
-## Project structure
-src/
-├── pages/
-│ └── Dashboard.tsx # main view: polling loop, status derivation, grid
-├── components/
-│ ├── HomeCard.tsx # home summary card with status color and hide button
-│ ├── HomeDetailModal.tsx # detail view: stats, appliances, trend chart
-│ ├── AddHomeModal.tsx # home registration form
-│ ├── TrendChart.tsx # Recharts line chart (capped at last 30 points)
-│ ├── PulseLine.tsx # signature animated energy pulse
-│ ├── StatusBadge.tsx # status label (normal / warning / breach / anomaly)
-│ ├── ApplianceIcon.tsx # appliance type icons
-│ ├── HouseDoodle.tsx # house mark + empty state
-│ └── TopBar.tsx # header with add-home action
-├── lib/
-│ └── api.ts # backend calls, name cache, local hide logic
-├── types/
-│ └── api.ts # TypeScript types mirroring the backend DTOs
-└── index.css # Tailwind v4 theme tokens (design system)
 
 ## Implementation notes
 

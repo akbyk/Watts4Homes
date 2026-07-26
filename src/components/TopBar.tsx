@@ -1,3 +1,5 @@
+import { ThemeToggle } from "./ThemeToggle";
+
 interface TopBarProps {
   onAddHome?: () => void;
 }
@@ -25,12 +27,15 @@ export function TopBar({ onAddHome }: TopBarProps) {
           </span>
         </a>
 
-        <button
-          onClick={onAddHome}
-          className="rounded-full bg-energy px-4 py-2 text-sm font-500 text-white transition hover:brightness-105 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-energy"
-        >
-          Ev ekle
-        </button>
+        <div className="flex items-center gap-3">
+          <ThemeToggle />
+          <button
+            onClick={onAddHome}
+            className="rounded-full bg-energy px-4 py-2 text-sm font-500 text-white transition hover:brightness-105 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-energy"
+          >
+            Ev ekle
+          </button>
+        </div>
       </div>
     </header>
   );
