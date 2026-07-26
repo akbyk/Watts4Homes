@@ -27,7 +27,7 @@
   --radius-card: 20px;
 }
 
-/* dark theme -> override the same tokens so every bg-*/text-* utility flips */
+/* dark theme -> override the same tokens so every bg and text utility flips */
 .dark {
   --color-paper: #10161a;
   --color-mist: #1a2329;
