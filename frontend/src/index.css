@@ -1,0 +1,83 @@
+@import "tailwindcss";
+
+/* VoltWise design tokens
+   colors are functional: each hue names a state, not a decoration
+   green = healthy, blue = data, amber = warning, coral = breach */
+@theme {
+  --color-paper: #fbfdfc;
+  --color-mist: #f1f6f4;
+  --color-ink: #1c2b33;
+  --color-slate: #5b6b73;
+
+  --color-energy: #0fa968;
+  --color-energy-soft: #e3f5ec;
+  --color-deep: #0e7c9b;
+  --color-deep-soft: #e2f0f5;
+  --color-amber: #f4b740;
+  --color-amber-soft: #fdf2da;
+  --color-coral: #e5484d;
+  --color-coral-soft: #fdebeb;
+
+  --color-line: #e4ece9;
+
+  --font-display: "Fraunces", Georgia, serif;
+  --font-body: "Inter", system-ui, sans-serif;
+  --font-mono: "JetBrains Mono", monospace;
+
+  --radius-card: 20px;
+}
+
+/* dark theme -> override the same tokens so every bg-*/text-* utility flips */
+.dark {
+  --color-paper: #10161a;
+  --color-mist: #1a2329;
+  --color-ink: #e9efec;
+  --color-slate: #93a2a8;
+
+  --color-energy: #16b378;
+  --color-energy-soft: #123328;
+  --color-deep: #29a8ca;
+  --color-deep-soft: #10303a;
+  --color-amber: #f4b740;
+  --color-amber-soft: #372c12;
+  --color-coral: #f0595e;
+  --color-coral-soft: #371a1c;
+
+  --color-line: #26323a;
+
+  color-scheme: dark;
+}
+
+/* surfaces that use literal colors instead of tokens ->
+   :where() keeps specificity low so hover states still win */
+:where(.dark) .bg-white {
+  background-color: var(--color-mist);
+}
+
+/* modal backdrop uses bg-ink/40; in dark that would turn light -> force dark */
+:where(.dark) .bg-ink\/40 {
+  background-color: rgba(0, 0, 0, 0.6);
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  margin: 0;
+  background-color: var(--color-paper);
+  color: var(--color-ink);
+  font-family: var(--font-body);
+  -webkit-font-smoothing: antialiased;
+}
+
+/* respect users who prefer less motion */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
