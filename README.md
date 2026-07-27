@@ -1,6 +1,6 @@
-# VoltWise
+# Watts4Homes
 
-VoltWise is a real-time IoT energy analytics and budget auditing platform. It ingests live appliance-level telemetry from home sensors, tracks per-home energy usage and cost against a configurable budget in real time, applies tariff and anomaly rules, and sends AI-generated behavioral advisories by email when a home crosses a usage threshold or an appliance starts drawing an unsafe amount of power.
+Watts4Homes is a real-time IoT energy analytics and budget auditing platform. It ingests live appliance-level telemetry from home sensors, tracks per-home energy usage and cost against a configurable budget in real time, applies tariff and anomaly rules, and sends AI-generated behavioral advisories by email when a home crosses a usage threshold or an appliance starts drawing an unsafe amount of power.
 
 The system is built as two independent Spring Boot applications connected exclusively through Kafka, backed by Apache Ignite for hot-path operational state and PostgreSQL for durable, permanent records.
 
@@ -33,8 +33,8 @@ The system is built as two independent Spring Boot applications connected exclus
 
 ### Components
 
-- **VoltWise Core** — a Spring Boot modular monolith organized by feature (`homes`, `telemetry`, `rules`, `notifications`). It owns the REST API, the Kafka consumers/producers, all Postgres persistence, and all Ignite state management.
-- **VoltWise Telemetry Sensors** — a standalone Spring Boot application that simulates appliance-level power draw for every registered home. It has no dependency on Core and communicates exclusively through Kafka.
+- **Watts4Homes Core** — a Spring Boot modular monolith organized by feature (`homes`, `telemetry`, `rules`, `notifications`). It owns the REST API, the Kafka consumers/producers, all Postgres persistence, and all Ignite state management.
+- **Watts4Homes Telemetry Sensors** — a standalone Spring Boot application that simulates appliance-level power draw for every registered home. It has no dependency on Core and communicates exclusively through Kafka.
 - **Apache Ignite** — holds the current operational state of the system: running usage/cost totals per home and consecutive-breach counters per appliance. This is the sub-millisecond read/write path and is treated as disposable — nothing here needs to survive a restart.
 - **PostgreSQL** — the system of record. Home and appliance configuration, the permanent audit trail of every breach/anomaly/penalty event, generated AI advisories, and daily consumption snapshots all live here.
 - **Apache Kafka** — the only channel of communication between Core and Sensors. Both topics are keyed by `home_id` so that all messages for a given home are processed in order by the same consumer thread.
@@ -53,15 +53,15 @@ The system is built as two independent Spring Boot applications connected exclus
 ### 1. Start the infrastructure
 
 ```bash
-cd voltwise
+cd Watts4Homes
 docker compose up -d
 ```
 
 This brings up Kafka (KRaft mode, no Zookeeper), a single-node Ignite instance, and PostgreSQL. Verify each service is healthy before continuing:
 
 ```bash
-docker exec voltwise-postgres pg_isready -U voltwise -d voltwise
-docker exec voltwise-kafka /opt/kafka/bin/kafka-broker-api-versions.sh --bootstrap-server localhost:9092
+docker exec Watts4Homes-postgres pg_isready -U Watts4Homes -d Watts4Homes
+docker exec Watts4Homes-kafka /opt/kafka/bin/kafka-broker-api-versions.sh --bootstrap-server localhost:9092
 curl "http://localhost:8080/ignite?cmd=version"
 ```
 
@@ -72,9 +72,9 @@ Core and Sensors read all connection details and secrets from environment variab
 ```bash
 export DB_HOST=localhost
 export DB_PORT=5432
-export DB_NAME=voltwise
-export DB_USER=voltwise
-export DB_PASSWORD=voltwise_dev_password
+export DB_NAME=Watts4Homes
+export DB_USER=Watts4Homes
+export DB_PASSWORD=Watts4Homes_dev_password
 export KAFKA_BOOTSTRAP_SERVERS=localhost:9092
 export IGNITE_ADDRESS=localhost:10800
 export GEMINI_API_KEY=your-gemini-api-key
@@ -96,7 +96,7 @@ Neither file is committed to source control.
 ### 3. Run Core
 
 ```bash
-cd voltwise-core
+cd Watts4Homes-core
 source ../.env.core
 mvn clean install
 mvn spring-boot:run
@@ -107,7 +107,7 @@ On startup, Core applies its database migrations, connects to Kafka, Ignite, and
 ### 4. Run Telemetry Sensors
 
 ```bash
-cd voltwise-sensors
+cd Watts4Homes-sensors
 source ../.env.sensors
 mvn clean install
 mvn spring-boot:run
@@ -159,7 +159,7 @@ Full request/response schemas are available through Swagger once Core is running
 | `ai_recommendations` | Every AI-generated (or fallback) advisory, with email delivery status |
 | `consumption_snapshots` | Daily rollup of usage and cost per home, used for historical trend charts |
 
-Schema is managed entirely through Flyway migrations in `voltwise-core/src/main/resources/db/migration`.
+Schema is managed entirely through Flyway migrations in `Watts4Homes-core/src/main/resources/db/migration`.
 
 ## Kafka Topics
 
@@ -182,20 +182,20 @@ Ignite holds no data that isn't reconstructible from Postgres on first use; noth
 ## Project Structure
 
 ```
-voltwise/
+Watts4Homes/
 ├── docker-compose.yml
 ├── contracts/
 ├── docs/
-├── voltwise-core/
-│   └── src/main/java/com/voltwise/core/
+├── Watts4Homes-core/
+│   └── src/main/java/com/Watts4Homes/core/
 │       ├── homes/
 │       ├── telemetry/
 │       ├── rules/
 │       ├── notifications/
 │       ├── scheduling/
 │       └── config/
-└── voltwise-sensors/
-    └── src/main/java/com/voltwise/sensors/
+└── Watts4Homes-sensors/
+    └── src/main/java/com/Watts4Homes/sensors/
         ├── registry/
         ├── listener/
         ├── simulation/
