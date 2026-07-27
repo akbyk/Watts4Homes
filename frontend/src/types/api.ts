@@ -7,6 +7,8 @@ export type ApplianceLiveStatus = string;
 // GET /api/homes/status  and  /api/homes/{id}/status
 export interface ApplianceStatus {
   applianceId: number;
+  name: string;
+  type: string;
   safeLimitWatts: number;
   consecutiveBreachCount: number;
   status: ApplianceLiveStatus;
@@ -14,6 +16,7 @@ export interface ApplianceStatus {
 
 export interface HomeStatus {
   homeId: number;
+  homeName: string;
   accumulatedUsage: number;
   accumulatedCost: number;
   tariffState: TariffState;

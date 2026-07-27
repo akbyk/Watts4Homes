@@ -10,7 +10,9 @@ import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -18,6 +20,8 @@ public class HomeStatusService {
 
     private final HomeStateStore homeStateStore;
     private final ApplianceBreachStore applianceBreachStore;
+    private final HomeRepository homeRepository;
+    private final ApplianceRepository applianceRepository;
 
     public Optional<HomeStatusResponse> getStatus(Long homeId) {
         HomeState state = homeStateStore.get(homeId);
@@ -36,19 +40,35 @@ public class HomeStatusService {
     }
 
     private HomeStatusResponse toResponse(Long homeId, HomeState state) {
+        // labels live in postgres, not ignite -> read them here so any device stays label-complete
+        String homeName = homeRepository.findById(homeId)
+                .map(Home::getName)
+                .orElse("Ev #" + homeId);
+
+        // one query per home for its appliances -> map by id for name/type lookup
+        Map<Long, Appliance> applianceById = applianceRepository.findByHomeId(homeId).stream()
+                .collect(Collectors.toMap(Appliance::getId, a -> a));
+
         List<HomeStatusResponse.ApplianceStatus> appliances = new ArrayList<>();
         if (state.getApplianceIds() != null) {
             for (Long applianceId : state.getApplianceIds()) {
+                Appliance appliance = applianceById.get(applianceId);
+                String name = appliance != null ? appliance.getName() : "Cihaz";
+                String type = appliance != null ? appliance.getType() : "DEFAULT";
+
                 ApplianceBreachState breach = applianceBreachStore.get(homeId + ":" + applianceId);
                 if (breach != null) {
                     appliances.add(new HomeStatusResponse.ApplianceStatus(
-                            applianceId, breach.getSafeLimitWatts(), breach.getConsecutiveBreachCount(), breach.getLastStatus()));
+                            applianceId, name, type,
+                            breach.getSafeLimitWatts(), breach.getConsecutiveBreachCount(), breach.getLastStatus()));
                 } else {
-                    appliances.add(new HomeStatusResponse.ApplianceStatus(applianceId, 0, 0, "UNKNOWN"));
+                    appliances.add(new HomeStatusResponse.ApplianceStatus(
+                            applianceId, name, type, 0, 0, "UNKNOWN"));
                 }
             }
         }
-        return new HomeStatusResponse(homeId, state.getAccumulatedUsage(), state.getAccumulatedCost(),
-                state.getTariffState(), state.getBudgetQuota(), appliances);
+
+        return new HomeStatusResponse(homeId, homeName, state.getAccumulatedUsage(),
+                state.getAccumulatedCost(), state.getTariffState(), state.getBudgetQuota(), appliances);
     }
 }
