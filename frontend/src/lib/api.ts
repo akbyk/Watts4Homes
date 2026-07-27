@@ -91,7 +91,28 @@ export async function fetchHomeStatus(): Promise<HomeStatus[]> {
   if (!res.ok) {
     throw new Error(`Durum alınamadı (${res.status})`);
   }
-  return res.json();
+
+  const homes: HomeStatus[] = await res.json();
+
+  // the status response now carries names -> seed the cache from it so labels
+  // are correct on any device, not just the one that registered the home
+  let changed = false;
+  for (const home of homes) {
+    if (home.homeName && cache.homeNames[home.homeId] !== home.homeName) {
+      cache.homeNames[home.homeId] = home.homeName;
+      changed = true;
+    }
+    for (const a of home.appliances) {
+      const meta = cache.applianceMeta[a.applianceId];
+      if (a.name && (meta?.name !== a.name || meta?.type !== a.type)) {
+        cache.applianceMeta[a.applianceId] = { name: a.name, type: a.type };
+        changed = true;
+      }
+    }
+  }
+  if (changed) saveCache();
+
+  return homes;
 }
 
 // resolve a home's display name
@@ -126,6 +147,8 @@ export async function registerHome(
       mockApplianceMeta[id] = { name: a.name, type: a.type };
       return {
         applianceId: id,
+        name: a.name,
+        type: a.type,
         safeLimitWatts: a.safeLimitWatts,
         consecutiveBreachCount: 0,
         status: "NORMAL" as const,
@@ -133,6 +156,7 @@ export async function registerHome(
     });
     mockHomes.push({
       homeId,
+      homeName: req.name,
       accumulatedUsage: 0,
       accumulatedCost: 0,
       tariffState: "NORMAL",
